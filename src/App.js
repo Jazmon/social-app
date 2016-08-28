@@ -170,11 +170,11 @@ class App extends React.Component<*, Props, State> {
             return (
               <View />
             );
-          } /* else if (props) {
+          } else if (props) {
             return (
               <Component
                 {...params}
-                {...data}
+                {...defaultProps}
                 {...props}
                 // focused={true}
                 navigator={navigator}
@@ -190,7 +190,7 @@ class App extends React.Component<*, Props, State> {
           return (
             <Component
               {...params}
-              {...data}
+              {...defaultProps}
               {...props}
               // focused={false}
               navigator={navigator}
@@ -200,21 +200,21 @@ class App extends React.Component<*, Props, State> {
               retry={retry}
               loading={true}
             />
-          );*/
-
-          return (
-            <Component
-              {...params}
-              {...defaultProps}
-              {...props}
-              // focused={false}
-              navigator={navigator}
-              route={route}
-              name={title}
-              retry={retry}
-              loading={!!props}
-            />
           );
+
+          // return (
+          //   <Component
+          //     {...params}
+          //     {...defaultProps}
+          //     {...props}
+          //     // focused={false}
+          //     navigator={navigator}
+          //     route={route}
+          //     name={title}
+          //     retry={retry}
+          //     loading={!!props}
+          //   />
+          // );
         }}
       />
     );
