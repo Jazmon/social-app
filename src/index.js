@@ -2,9 +2,13 @@
 import React, { Component, PropTypes } from 'react';
 import {
   View,
-  Text,
+  // Text,
   StyleSheet,
+  AsyncStorage,
 } from 'react-native';
+
+import App from './App';
+import Login from './Login';
 
 type Props = {
   // navigator: Object;
@@ -14,38 +18,58 @@ type Props = {
 };
 
 type State = {
-  text: string;
+  loggedIn: boolean;
 };
 
 type DefaultProps = {};
 
-class App extends Component<*, Props, State> {
+class Main extends Component<*, Props, State> {
   props: Props;
 
-  static propTypes = {
+  // static propTypes = {
     // navigator: PropTypes.object.isRequired,
     // route: PropTypes.object.isRequired,
     // relay: PropTypes.object.isRequired,
     // loading: PropTypes.bool.isRequired,
-  };
+  // };
 
 
   constructor(props: Props) {
     super(props);
 
     this.state = {
-      text: 'App',
+      loggedIn: false,
     };
+    // $FlowIssue
+    this.checkLogin = this.checkLogin.bind(this);
   }
 
   state: State;
 
-  render(): React.Element<*> {
+  componentDidMount() {
+    this.checkLogin();
+  }
+
+  async checkLogin() { // eslint-disable-line consistent-return
+    try {
+      let loggedIn = await AsyncStorage.getItem('loggedIn');
+      if (loggedIn !== null) {
+        loggedIn = (JSON.parse(loggedIn)).loggedIn;
+        this.setState({
+          loggedIn,
+        });
+      }
+    } catch (err) {
+      throw err;
+    }
+  }
+
+  render() {
+    const { loggedIn } = this.state;
     return (
       <View style={styles.container}>
-        <View style={styles.innerContainer}>
-          <Text style={styles.text}>App</Text>
-        </View>
+        {loggedIn && <App />}
+        {!loggedIn && <Login checkLogin={this.checkLogin} />}
       </View>
     );
   }
@@ -55,18 +79,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     flexDirection: 'column',
-    backgroundColor: '#fff',
-  },
-  innerContainer: {
-    flex: 1,
-    flexDirection: 'column',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  text: {
-    color: '#000',
-    fontSize: 16,
   },
 });
 
-export default App;
+export default Main;
