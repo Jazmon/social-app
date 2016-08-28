@@ -2,7 +2,7 @@ module.exports = {
   settings: {
     'import/resolver': {
       node: {
-        extensions: ['.js', '.android.js', '.ios.js']
+        extensions: ['.js', '.android.js', '.ios.js', '.jsx', '.android.jsx', '.ios.jsx']
       }
     }
   },
@@ -58,6 +58,7 @@ module.exports = {
     'react/jsx-sort-props': 0,
     'react/jsx-uses-react': 1,
     'react/jsx-uses-vars': 1,
+    'react/jsx-filename-extension': 0, // NOTE react-native packager doesn't support .jsx extensions
     'babel/flow-object-type': 1,
     'react/no-did-mount-set-state': 1,
     'react/no-did-update-set-state': 1,
