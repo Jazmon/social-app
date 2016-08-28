@@ -1,0 +1,18 @@
+{
+  "name": "SocialApp",
+  "version": "0.0.1",
+  "private": true,
+  "scripts": {
+    "start": "node node_modules/react-native/local-cli/cli.js start",
+    "lint": "./node_modules/.bin/eslint -c .eslintrc.js src/",
+    "test": "mocha src/**/*.spec.js",
+    "test:watch": "chokidar 'src/**/*.js' 'test/**/*.js' -c 'npm test'",
+    "coverage": "babel-node node_modules/isparta/bin/isparta cover --i=src/**/*.js --x=src/**/*.spec.js --x=node_modules node_modules/mocha/bin/_mocha -- src/**/*.spec.js",
+    "check-coverage": "istanbul check-coverage",
+    "updateSchema": "node ./scripts/updateSchema.js"
+  },
+  "dependencies": {
+    "react": "15.3.1",
+    "react-native": "0.32.0"
+  }
+}
