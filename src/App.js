@@ -16,6 +16,7 @@ import {
   gqErrorsMiddleware,
 } from 'react-relay-network-layer';
 
+import config from '../config.json';
 import Social from './containers/Social';
 import SocialQueryConfig from './queryconfigs/SocialQueryConfig';
 
@@ -63,6 +64,7 @@ class App extends React.Component<*, Props, State> {
     // this.state = {
     //   text: 'App',
     // };
+
     this.goBack = this.goBack.bind(this);
     this.onMainScreen = this.onMainScreen.bind(this);
     this.renderScene = this.renderScene.bind(this);
@@ -82,10 +84,12 @@ class App extends React.Component<*, Props, State> {
   }
 
   componentDidMount() {
+    console.log('url:', config.relayUrl);
+    // Relay.injectNetworkLayer(new Relay.DefaultNetworkLayer(config.relayUrl));
     Relay.injectNetworkLayer(
      new RelayNetworkLayer([
        urlMiddleware({
-         url: 'http://192.168.1.100:3000/graphql',
+         url: config.relayUrl,
        }),
        // loggerMiddleware(),
        gqErrorsMiddleware(),
