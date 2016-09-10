@@ -1,5 +1,5 @@
 // @flow
-import React, { Component, PropTypes } from 'react';
+import React, { Component } from 'react';
 import {
   View,
   // Text,
@@ -21,8 +21,6 @@ type State = {
   loggedIn: boolean;
 };
 
-type DefaultProps = {};
-
 class Main extends Component<*, Props, State> {
   props: Props;
 
@@ -36,7 +34,6 @@ class Main extends Component<*, Props, State> {
 
   constructor(props: Props) {
     super(props);
-    console.log('main constructor');
 
     this.state = {
       loggedIn: false,
@@ -48,7 +45,6 @@ class Main extends Component<*, Props, State> {
   state: State;
 
   componentDidMount() {
-    console.log('main comp did mount');
     this.checkLogin();
   }
 

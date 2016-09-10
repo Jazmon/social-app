@@ -2,7 +2,6 @@
 import React, { PropTypes } from 'react';
 import {
   View,
-  Text,
   TouchableHighlight,
   StyleSheet,
 } from 'react-native';

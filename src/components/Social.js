@@ -10,6 +10,8 @@ import {
 } from 'react-native';
 // import _ from 'lodash';
 
+import Story from './Story';
+
 type Props = {
   navigator: Object;
   route: Object;
@@ -52,7 +54,6 @@ class Social extends Component<DefaultProps, Props, State> {
 
   constructor(props: Props) {
     super(props);
-    console.log('social constructor');
 
     this.renderRow = this.renderRow.bind(this);
   }
@@ -68,19 +69,28 @@ class Social extends Component<DefaultProps, Props, State> {
   renderRow: Function;
   renderRow(rowData: Object) {
     const post = rowData.node;
-    const hasComments = post.comments.edges.length > 0;
+    console.log('post', post);
+    const storyPost = {
+      ...post,
+      comments: post.comments.edges.map(comment => comment.node),
+    };
+    // const hasComments = post.comments.edges.length > 0;
     return (
-      <View key={post.id} style={styles.postContainer}>
-        <Text style={styles.postText}>{post.text}</Text>
-        {hasComments && <View style={styles.commentContainer}>
-          {post.comments.edges.map(comment => (
-            <View style={styles.comment} key={comment.node.id}>
-              <Text style={styles.commentText}>{comment.node.text}</Text>
-            </View>
-          ))}
-        </View>}
-      </View>
+      <Story key={post.id} post={storyPost} />
     );
+
+    // return (
+    //   <View key={post.id} style={styles.postContainer}>
+    //     <Text style={styles.postText}>{post.text}</Text>
+    //     {hasComments && <View style={styles.commentContainer}>
+    //       {post.comments.edges.map(comment => (
+    //         <View style={styles.comment} key={comment.node.id}>
+    //           <Text style={styles.commentText}>{comment.node.text}</Text>
+    //         </View>
+    //       ))}
+    //     </View>}
+    //   </View>
+    // );
   }
 
   render(): React.Element<*> {
@@ -88,7 +98,6 @@ class Social extends Component<DefaultProps, Props, State> {
     const email = this.props.email || '';
     return (
       <View style={styles.container}>
-        <Text style={styles.text}>Social</Text>
         {!loading && !!this.props.dataSource &&
           <View style={styles.innerContainer}>
             <Text style={styles.email}>{email}</Text>
@@ -122,10 +131,6 @@ const styles = StyleSheet.create({
   innerContainer: {
     flex: 1,
     flexDirection: 'column',
-  },
-  text: {
-    color: '#000',
-    fontSize: 24,
   },
   email: {
     color: 'rgba(55, 55, 55, 0.8)',

@@ -3,11 +3,11 @@ import React from 'react';
 import {
   Navigator,
   BackAndroid,
-  ToolbarAndroid,
   InteractionManager,
   View,
   Text,
   Platform,
+  Dimensions,
   StyleSheet,
 } from 'react-native';
 import Relay from 'react-relay';
@@ -23,6 +23,7 @@ import config from '../config';
 import SocialContainer from './containers/SocialContainer';
 import Social from './components/Social';
 import SocialQueryConfig from './queryconfigs/SocialQueryConfig';
+import Navbar from './components/Navbar';
 
 export type RouteType = {
   title: string;
@@ -31,7 +32,7 @@ export type RouteType = {
   Component: any;
   queryConfig: Object;
 };
-const Toolbar = Platform.OS === 'android' ? ToolbarAndroid : View;
+// const Toolbar = Platform.OS === 'android' ? ToolbarAndroid : View;
 type Props = {
   // navigator: Object;
   // route: Object;
@@ -71,7 +72,7 @@ class App extends React.Component<*, Props, State> {
     this.initialRoute = {
       index: 0,
       type: 'app',
-      anim: false,
+      title: 'Social',
     };
 
     this.goBack = this.goBack.bind(this);
@@ -83,7 +84,6 @@ class App extends React.Component<*, Props, State> {
   state: State;
 
   componentWillMount() {
-    console.log('app comp will mount');
     this.backListener = BackAndroid.addEventListener('hardwareBackPress', () => {
       if (!this.onMainScreen()) {
         this.goBack();
@@ -94,7 +94,6 @@ class App extends React.Component<*, Props, State> {
   }
 
   componentDidMount() {
-    console.log('app comp did mount');
     Relay.injectNetworkLayer(
      new RelayNetworkLayer([
        urlMiddleware({
@@ -137,7 +136,7 @@ class App extends React.Component<*, Props, State> {
     //   throw Error('Unknown route type');
     // }
     return {
-      title: 'Social App',
+      title: 'Social',
       Component: Social,
       Container: SocialContainer,
       queryConfig: new SocialQueryConfig(),
@@ -204,8 +203,8 @@ class App extends React.Component<*, Props, State> {
         initialRoute={this.initialRoute}
         renderScene={this.renderScene}
         navigationBar={
-          <Toolbar
-            style={{ height: 48, backgroundColor: '#bababa', alignSelf: 'flex-start' }}
+          <Navbar
+            style={styles.navbar}
             // navigator={navigator}
             // navState={navState}
           />
@@ -236,6 +235,17 @@ class App extends React.Component<*, Props, State> {
 const styles = StyleSheet.create({
   navigator: {
     flex: 1,
+    flexDirection: 'column',
+    paddingTop: 52,
+    alignItems: 'stretch',
+  },
+  navbar: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    width: Dimensions.get('window').width,
+    // height: 48,
+    height: 52,
   },
   // loadingContainer: {
   //   flex: 1,

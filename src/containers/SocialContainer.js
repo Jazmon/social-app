@@ -2,10 +2,6 @@
 import React, { Component, PropTypes } from 'react';
 import Relay from 'react-relay';
 import {
-  View,
-  Text,
-  StyleSheet,
-  Platform,
   ListView,
 } from 'react-native';
 import _ from 'lodash';
@@ -51,22 +47,17 @@ class SocialContainer extends Component<*, Props, State> {
     this.state = {
       initialListSize: postCount,
     };
-    console.log('viewer', props.viewer);
-    if (posts) this.dataSource = console.log('posts in constructor') || DataSource.cloneWithRows(posts);
+    if (posts) this.dataSource = DataSource.cloneWithRows(posts);
   }
 
   state: State;
 
   componentWillReceiveProps(nextProps: Props) {
-    console.log('comp will receive props');
     const posts: ?Array<any> = _.get(nextProps, 'viewer.posts.edges', null);
-    console.log('posts', posts);
     if (posts) this.dataSource = DataSource.cloneWithRows(posts);
   }
 
   render(): React.Element<*> {
-    const { loading } = this.props;
-    console.log('this.dataSource', this.dataSource);
     const email = _.get(this.props, 'viewer.email', '');
     const props = {
       ..._.omit(this.props, 'viewer'),
