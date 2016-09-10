@@ -69,7 +69,6 @@ class Social extends Component<DefaultProps, Props, State> {
   renderRow: Function;
   renderRow(rowData: Object) {
     const post = rowData.node;
-    console.log('post', post);
     const storyPost = {
       ...post,
       comments: post.comments.edges.map(comment => comment.node),
@@ -105,6 +104,7 @@ class Social extends Component<DefaultProps, Props, State> {
               initialListSize={this.props.initialListSize}
               dataSource={this.props.dataSource}
               renderRow={this.renderRow}
+              renderSeparator={(sID, rID) => <View key={`${sID}-${rID}`} style={{ height: 8 }} />}
               pageSize={5}
               scrollRenderAheadDistance={400}
               style={styles.listView}
@@ -138,38 +138,37 @@ const styles = StyleSheet.create({
     fontSize: 20,
   },
   listView: {
-    // borderColor: '#0f0', borderWidth: 1,
     flex: 1,
     flexDirection: 'column',
   },
-  postContainer: {
-    flex: 1,
-    flexDirection: 'column',
-    padding: 16,
-    // borderColor: '#f00', borderWidth: 1,
-    height: 140,
-    // justifyContent: 'center',
-  },
-  postText: {
-    fontSize: 20,
-    color: '#000',
-  },
-  commentContainer: {
-    backgroundColor: '#e4e4e4',
-    padding: 8,
-    flexDirection: 'column',
-    flex: 1,
-  },
-  comment: {
-
-    flex: 1,
-    flexDirection: 'column',
-  },
-  commentText: {
-    fontSize: 12,
-    fontWeight: '300',
-    fontFamily: Platform.OS === 'android' ? 'sans-serif-light' : undefined,
-  },
+  // postContainer: {
+  //   flex: 1,
+  //   flexDirection: 'column',
+  //   padding: 16,
+  //   // borderColor: '#f00', borderWidth: 1,
+  //   height: 140,
+  //   // justifyContent: 'center',
+  // },
+  // postText: {
+  //   fontSize: 20,
+  //   color: '#000',
+  // },
+  // commentContainer: {
+  //   backgroundColor: '#e4e4e4',
+  //   padding: 8,
+  //   flexDirection: 'column',
+  //   flex: 1,
+  // },
+  // comment: {
+  //
+  //   flex: 1,
+  //   flexDirection: 'column',
+  // },
+  // commentText: {
+  //   fontSize: 12,
+  //   fontWeight: '300',
+  //   fontFamily: Platform.OS === 'android' ? 'sans-serif-light' : undefined,
+  // },
 });
 
 export default Social;

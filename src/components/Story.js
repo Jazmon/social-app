@@ -51,7 +51,6 @@ type Post = {
   comments: Array<CommentType>;
 };
 
-
 type Props = {
   style?: ?any;
   post: Post;
@@ -63,11 +62,22 @@ function Story(props: Props): React.Element<*> {
   const hasComments = props.post.comments.length > 0;
   return (
     <View style={[styles.container, props.style]}>
-      <Text style={styles.text}>{props.post.text}</Text>
-      <View>
-        {hasComments && props.post.comments.map((comment) =>
-          <Comment key={comment.id} comment={comment} />
-        )}
+      <View style={{ flexDirection: 'column', marginRight: 8 }}>
+        <Text style={{ marginBottom: 8 }}>FooUser</Text>
+        <Image
+          source={{ uri: 'http://lorempixel.com/200/200/people/' }}
+          resizeMode="contain"
+          style={{ width: 40, height: 40 }}
+        />
+      </View>
+      <View style={styles.commentsContainer}>
+        <Text style={styles.text}>{props.post.text}</Text>
+        {hasComments && <View style={styles.comments}>
+          <Text>Comments</Text>
+          {props.post.comments.map((comment) =>
+            <Comment key={comment.id} comment={comment} />
+          )}
+        </View>}
       </View>
     </View>
   );
@@ -78,14 +88,24 @@ Story.defaultProps = defaultProps;
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
-    flexDirection: 'column',
-    backgroundColor: '#fff',
+    flexDirection: 'row',
+    padding: 8,
+    backgroundColor: '#f0f0f0',
     elevation: 1,
+  },
+  commentsContainer: {
+    flexDirection: 'column',
+    flex: 1,
   },
   text: {
     color: '#000',
     fontSize: 16,
+  },
+  comments: {
+    // padding: 8,
+    marginTop: 4,
+    flexDirection: 'column',
+    flex: 1,
   },
 });
 
