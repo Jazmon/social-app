@@ -27,10 +27,11 @@ import SocialQueryConfig from './queryconfigs/SocialQueryConfig';
 export type RouteType = {
   title: string;
   Container: React.Component<*, *, *>;
-  Component: React.Element<*> | React.Component<*, *, *>;
+  // Component: React.Element<*> | React.Component<*, *, *>;
+  Component: any;
   queryConfig: Object;
 };
-
+const Toolbar = Platform.OS === 'android' ? ToolbarAndroid : View;
 type Props = {
   // navigator: Object;
   // route: Object;
@@ -40,7 +41,7 @@ type Props = {
 
 type State = {
   // text: string;
-  relayReadyState: ?Object;
+  // relayReadyState: ?Object;
 };
 
 // type DefaultProps = {};
@@ -53,6 +54,7 @@ class App extends React.Component<*, Props, State> {
   onMainScreen: Function;
   determineScene: Function;
   forceRelayRetry: ?Function;
+  initialRoute: Object;
 
   static propTypes = {
     // navigator: PropTypes.object.isRequired,
@@ -65,10 +67,12 @@ class App extends React.Component<*, Props, State> {
   constructor(props: Props) {
     super(props);
 
-    this.state = {
-      relayReadyState: null,
-    };
     this.forceRelayRetry = null;
+    this.initialRoute = {
+      index: 0,
+      type: 'app',
+      anim: false,
+    };
 
     this.goBack = this.goBack.bind(this);
     this.onMainScreen = this.onMainScreen.bind(this);
@@ -79,6 +83,7 @@ class App extends React.Component<*, Props, State> {
   state: State;
 
   componentWillMount() {
+    console.log('app comp will mount');
     this.backListener = BackAndroid.addEventListener('hardwareBackPress', () => {
       if (!this.onMainScreen()) {
         this.goBack();
@@ -89,6 +94,7 @@ class App extends React.Component<*, Props, State> {
   }
 
   componentDidMount() {
+    console.log('app comp did mount');
     Relay.injectNetworkLayer(
      new RelayNetworkLayer([
        urlMiddleware({
@@ -121,20 +127,21 @@ class App extends React.Component<*, Props, State> {
   }
 
   determineScene(route: Object): RouteType {
-    if (route.type === 'app') {
-      if (route.index === 0) {
-        return {
-          title: 'Social App',
-          Component: Social,
-          Container: SocialContainer,
-          queryConfig: new SocialQueryConfig(),
-        };
-      }
-
-      throw Error('Unknown route type');
-    } else {
-      throw Error('Unknown route type');
-    }
+    // if (route.type === 'app') {
+    //   if (route.index === 0) {
+    //
+    //   }
+    //
+    //   throw Error('Unknown route type');
+    // } else {
+    //   throw Error('Unknown route type');
+    // }
+    return {
+      title: 'Social App',
+      Component: Social,
+      Container: SocialContainer,
+      queryConfig: new SocialQueryConfig(),
+    };
   }
 
   onMainScreen(): boolean {
@@ -150,94 +157,51 @@ class App extends React.Component<*, Props, State> {
     if (!this.navigator) this.navigator = navigator;
     const { title, Component, Container, queryConfig, ...routeProps } = this.determineScene(route);
 
-    // const relayLoading = !this.state.relayReadyState || !this.state.relayReadyState.ready;
-
-    // if (relayLoading) {
-    //   return (
-    //     <Component
-    //       {...routeProps}
-    //       // focused={false}
-    //       navigator={navigator}
-    //       route={route}
-    //       name={title}
-    //       goToLogin={this.goToLogin}
-    //       loading={true}
-    //     />
-    //   );
-    // }
+    const contProps = {
+      route,
+      name: title,
+      ...routeProps,
+      navigator,
+    };
 
     return (
       <Relay.Renderer
-        Container={Component}
+        Container={Container}
         queryConfig={queryConfig}
         environment={Relay.Store}
-        onReadyStateChange={(readyState) => this.setState({ relayReadyState: readyState })}
         // eslint-disable-next-line no-unused-vars
         render={({ done, error, props, retry, stale }) => {
           if (error) {
             console.error(error);
             return (
-              <View />
+              <View retry={retry} />
             );
           } else if (props) {
             return (
               <Container
-                {...routeProps}
-                {...props}
-                // focused={true}
-                navigator={navigator}
-                route={route}
-                name={title}
-                goToLogin={this.goToLogin}
-                retry={retry}
                 loading={false}
+                {...contProps}
+                {...props}
               />
             );
           }
 
           return (
             <Component
-              {...routeProps}
-              // focused={false}
-              navigator={navigator}
-              route={route}
-              name={title}
-              goToLogin={this.goToLogin}
               loading={true}
+              {...contProps}
             />
           );
-
-          // return (
-          //   <Component
-          //     {...params}
-          //     {...defaultProps}
-          //     {...props}
-          //     // focused={false}
-          //     navigator={navigator}
-          //     route={route}
-          //     name={title}
-          //     retry={retry}
-          //     loading={!!props}
-          //   />
-          // );
         }}
       />
     );
   }
 
   render(): React.Element<*> {
-    const initialRoute: Object = {
-      index: 0,
-      type: 'app',
-      anim: false,
-    };
-
-
-    const Toolbar = Platform.OS === 'android' ? ToolbarAndroid : View;
     return (
       <Navigator
         style={styles.navigator}
-        initialRoute={initialRoute}
+        initialRoute={this.initialRoute}
         renderScene={this.renderScene}
         navigationBar={
           <Toolbar

@@ -31,10 +31,6 @@ type DefaultProps = {
   initialListSize: number;
 };
 
-// declare class Social <DefaultProps, Props, State> {
-//
-// }
-
 class Social extends Component<DefaultProps, Props, State> {
   props: Props;
 
@@ -56,6 +52,7 @@ class Social extends Component<DefaultProps, Props, State> {
 
   constructor(props: Props) {
     super(props);
+    console.log('social constructor');
 
     this.renderRow = this.renderRow.bind(this);
   }
