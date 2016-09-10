@@ -3,9 +3,11 @@ import React from 'react';
 import {
   Navigator,
   BackAndroid,
+  ToolbarAndroid,
   InteractionManager,
   View,
-  // Text,
+  Text,
+  Platform,
   StyleSheet,
 } from 'react-native';
 import Relay from 'react-relay';
@@ -13,18 +15,18 @@ import {
   RelayNetworkLayer,
   urlMiddleware,
   perfMiddleware,
+  retryMiddleware,
   gqErrorsMiddleware,
 } from 'react-relay-network-layer';
 
-import config from '../config.json';
-import Social from './containers/Social';
+import config from '../config';
+import SocialContainer from './containers/SocialContainer';
+import Social from './components/Social';
 import SocialQueryConfig from './queryconfigs/SocialQueryConfig';
 
-// Relay.injectNetworkLayer(
-//   new Relay.DefaultNetworkLayer('http://localhost:3000/graphql'),
-// );
 export type RouteType = {
   title: string;
+  Container: React.Component<*, *, *>;
   Component: React.Element<*> | React.Component<*, *, *>;
   queryConfig: Object;
 };
@@ -38,6 +40,7 @@ type Props = {
 
 type State = {
   // text: string;
+  relayReadyState: ?Object;
 };
 
 // type DefaultProps = {};
@@ -49,6 +52,7 @@ class App extends React.Component<*, Props, State> {
   goBack: Function;
   onMainScreen: Function;
   determineScene: Function;
+  forceRelayRetry: ?Function;
 
   static propTypes = {
     // navigator: PropTypes.object.isRequired,
@@ -61,9 +65,10 @@ class App extends React.Component<*, Props, State> {
   constructor(props: Props) {
     super(props);
 
-    // this.state = {
-    //   text: 'App',
-    // };
+    this.state = {
+      relayReadyState: null,
+    };
+    this.forceRelayRetry = null;
 
     this.goBack = this.goBack.bind(this);
     this.onMainScreen = this.onMainScreen.bind(this);
@@ -84,46 +89,30 @@ class App extends React.Component<*, Props, State> {
   }
 
   componentDidMount() {
-    console.log('url:', config.relayUrl);
-    // Relay.injectNetworkLayer(new Relay.DefaultNetworkLayer(config.relayUrl));
     Relay.injectNetworkLayer(
      new RelayNetworkLayer([
        urlMiddleware({
-         url: config.relayUrl,
+         url: config.relayUrl(Platform.OS),
        }),
        // loggerMiddleware(),
        gqErrorsMiddleware(),
        perfMiddleware(),
-       // retryMiddleware({
-       //   fetchTimeout: 15000,
-       //   // or simple array [3200, 6400, 12800, 25600, 51200, 102400, 204800, 409600],
-       //   retryDelays: (attempt) => Math.pow(2, attempt + 4) * 100,
-       //   forceRetry: (cb, delay) => {
-       //     window.forceRelayRetry = cb;
-       //     console.log(`call 'forceRelayRetry()' for immediately retry! Or wait ${delay}ms.`);
-       //   },
-       //   statusCodes: [500, 503, 504],
-       // }),
+       retryMiddleware({
+         fetchTimeout: 15000,
+         // or simple array [3200, 6400, 12800, 25600, 51200, 102400, 204800, 409600],
+         retryDelays: (attempt) => Math.pow(2, attempt + 4) * 100,
+         forceRetry: (cb, delay) => {
+           this.forceRelayRetry = cb;
+         },
+         statusCodes: [500, 503, 504],
+       }),
        // authMiddleware({
        //   token: () => token,
        // }),
-      //  next => async(req) => {
-      //    const result = await AsyncStorage.getItem('gqlToken');
-      //    let gqlToken;
-      //    if (!!result) {
-      //      console.log('Got token from async store, setting it');
-      //      console.log('result', result);
-      //      gqlToken = JSON.parse(result).token;
-      //    } else {
-      //      gqlToken = token;
-      //    }
-      //    req.headers.auth = gqlToken; // eslint-disable-line no-param-reassign
-      //    return next(req);
-      //  },
      ], {
        disableBatchQuery: true,
      })
-   );
+    );
     Relay.injectTaskScheduler(InteractionManager.runAfterInteractions);
   }
 
@@ -137,8 +126,8 @@ class App extends React.Component<*, Props, State> {
         return {
           title: 'Social App',
           Component: Social,
+          Container: SocialContainer,
           queryConfig: new SocialQueryConfig(),
-          defaultProps: [{ viewer: null }],
         };
       }
 
@@ -159,16 +148,32 @@ class App extends React.Component<*, Props, State> {
   renderScene: Function;
   renderScene(route: RouteType, navigator: Object) {
     if (!this.navigator) this.navigator = navigator;
-    const { title, Component, queryConfig, defaultProps, ...params } = this.determineScene(route);
+    const { title, Component, Container, queryConfig, ...routeProps } = this.determineScene(route);
+
+    // const relayLoading = !this.state.relayReadyState || !this.state.relayReadyState.ready;
+
+    // if (relayLoading) {
+    //   return (
+    //     <Component
+    //       {...routeProps}
+    //       // focused={false}
+    //       navigator={navigator}
+    //       route={route}
+    //       name={title}
+    //       goToLogin={this.goToLogin}
+    //       loading={true}
+    //     />
+    //   );
+    // }
 
     return (
       <Relay.Renderer
         Container={Component}
         queryConfig={queryConfig}
         environment={Relay.Store}
+        onReadyStateChange={(readyState) => this.setState({ relayReadyState: readyState })}
         // eslint-disable-next-line no-unused-vars
         render={({ done, error, props, retry, stale }) => {
-          if (stale) { console.warn('data was stale in relay'); }
           if (error) {
             console.error(error);
             return (
@@ -176,9 +181,8 @@ class App extends React.Component<*, Props, State> {
             );
           } else if (props) {
             return (
-              <Component
-                {...params}
-                {...defaultProps}
+              <Container
+                {...routeProps}
                 {...props}
                 // focused={true}
                 navigator={navigator}
@@ -193,15 +197,12 @@ class App extends React.Component<*, Props, State> {
 
           return (
             <Component
-              {...params}
-              {...defaultProps}
-              {...props}
+              {...routeProps}
               // focused={false}
               navigator={navigator}
               route={route}
               name={title}
               goToLogin={this.goToLogin}
-              retry={retry}
               loading={true}
             />
           );
@@ -231,16 +232,38 @@ class App extends React.Component<*, Props, State> {
       anim: false,
     };
 
+
+    const Toolbar = Platform.OS === 'android' ? ToolbarAndroid : View;
     return (
       <Navigator
         style={styles.navigator}
         initialRoute={initialRoute}
         renderScene={this.renderScene}
+        navigationBar={
+          <Toolbar
+            style={{ height: 48, backgroundColor: '#bababa', alignSelf: 'flex-start' }}
+            // navigator={navigator}
+            // navState={navState}
+          />
+        }
         // onDidFocus={() => this.setFocus(true)}
         // onWillFocus={() => this.setFocus(false)}
         // eslint-disable-next-line no-unused-vars
         configureScene={(route, routeStack) =>
           route.sceneConfig || Navigator.SceneConfigs.PushFromRight}
+        // navigationBar={
+        //   <Navigator.NavigationBar
+        //     routeMapper={{
+        //       LeftButton: (route, navigator, index, navState) =>
+        //        { return (<Text>Cancel</Text>); },
+        //       RightButton: (route, navigator, index, navState) =>
+        //         { return (<Text>Done</Text>); },
+        //       Title: (route, navigator, index, navState) =>
+        //         { return (<Text>Awesome Nav Bar</Text>); },
+        //     }}
+        //     style={{backgroundColor: 'gray'}}
+        //   />
+        // }
       />
     );
   }

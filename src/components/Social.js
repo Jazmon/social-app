@@ -1,6 +1,6 @@
 // @flow
 import React, { Component, PropTypes } from 'react';
-import Relay from 'react-relay';
+// import Relay from 'react-relay';
 import {
   View,
   Text,
@@ -8,65 +8,65 @@ import {
   Platform,
   ListView,
 } from 'react-native';
+// import _ from 'lodash';
 
 type Props = {
   navigator: Object;
   route: Object;
-  relay: Object;
+  // relay: Object;
   loading: boolean;
-  viewer?: ?Object;
-};
-
-type State = {
+  // viewer?: ?Object;
+  email?: ?string;
+  posts?: ?Array<Object>;
+  dataSource: ?Object;
   initialListSize: number;
 };
 
+type State = {
+  // initialListSize: number;
+};
 
-const DataSource = new ListView.DataSource({
-  rowHasChanged: (r1, r2) => r1.id !== r2.id,
-});
+type DefaultProps = {
+  dataSource: null;
+  initialListSize: number;
+};
 
-// type DefaultProps = {};
+// declare class Social <DefaultProps, Props, State> {
+//
+// }
 
-class Social extends Component<*, Props, State> {
+class Social extends Component<DefaultProps, Props, State> {
   props: Props;
-  dataSource: Object;
 
   static propTypes = {
     navigator: PropTypes.object.isRequired,
     route: PropTypes.object.isRequired,
-    relay: PropTypes.object.isRequired,
+    // relay: PropTypes.object,
     loading: PropTypes.bool.isRequired,
-    viewer: PropTypes.object,
+    email: PropTypes.string,
+    posts: PropTypes.arrayOf(PropTypes.object),
+    dataSource: PropTypes.object,
+    initialListSize: PropTypes.number,
   };
 
+  static defaultProps = {
+    dataSource: null,
+    initialListSize: 0,
+  };
 
   constructor(props: Props) {
     super(props);
-
-    if (props.viewer && props.viewer.postCount) {
-      this.state = {
-        initialListSize: props.viewer.postCount,
-      };
-      if (props.viewer.posts && props.viewer.posts.edges) {
-        this.dataSource = DataSource.cloneWithRows(props.viewer.posts.edges);
-      }
-    } else {
-      this.state = {
-        initialListSize: 0,
-      };
-    }
 
     this.renderRow = this.renderRow.bind(this);
   }
 
   state: State;
 
-  componentWillReceiveProps(nextProps: Props) {
-    if (nextProps.viewer && nextProps.viewer.posts && nextProps.viewer.posts.edges) {
-      this.dataSource = DataSource.cloneWithRows(nextProps.viewer.posts.edges);
-    }
-  }
+  // componentWillReceiveProps(nextProps: Props) {
+  //   if (nextProps.viewer && nextProps.viewer.posts && nextProps.viewer.posts.edges) {
+  //     this.dataSource = DataSource.cloneWithRows(nextProps.viewer.posts.edges);
+  //   }
+  // }
 
   renderRow: Function;
   renderRow(rowData: Object) {
@@ -88,21 +88,25 @@ class Social extends Component<*, Props, State> {
 
   render(): React.Element<*> {
     const { loading } = this.props;
+    const email = this.props.email || '';
     return (
       <View style={styles.container}>
         <Text style={styles.text}>Social</Text>
-        {!loading &&
+        {!loading && !!this.props.dataSource &&
           <View style={styles.innerContainer}>
-            <Text style={styles.email}>{this.props.viewer.email}</Text>
+            <Text style={styles.email}>{email}</Text>
             <ListView
-              initialListSize={this.state.initialListSize}
-              dataSource={this.dataSource}
+              initialListSize={this.props.initialListSize}
+              dataSource={this.props.dataSource}
               renderRow={this.renderRow}
               pageSize={5}
               scrollRenderAheadDistance={400}
               style={styles.listView}
             />
           </View>
+        }
+        {loading &&
+          <View><Text>Loading...</Text></View>
         }
       </View>
     );
@@ -166,35 +170,37 @@ const styles = StyleSheet.create({
   },
 });
 
-export default Relay.createContainer(Social, {
-  initialVariables: {},
-  fragments: {
-    viewer: () => Relay.QL`
-      fragment on User {
-        id
-        postCount
-        email
-        posts(
-          first: 2147483647  # max GraphQLInt
-        ) {
-          edges {
-            node {
-              id
-              text
-              comments(
-                first: 2147483647  # max GraphQLInt
-              ) {
-                edges {
-                  node {
-                    id
-                    text
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
-    `,
-  },
-});
+export default Social;
+//
+// export default Relay.createContainer(Social, {
+//   initialVariables: {},
+//   fragments: {
+//     viewer: () => Relay.QL`
+//       fragment on User {
+//         id
+//         postCount
+//         email
+//         posts(
+//           first: 2147483647  # max GraphQLInt
+//         ) {
+//           edges {
+//             node {
+//               id
+//               text
+//               comments(
+//                 first: 2147483647  # max GraphQLInt
+//               ) {
+//                 edges {
+//                   node {
+//                     id
+//                     text
+//                   }
+//                 }
+//               }
+//             }
+//           }
+//         }
+//       }
+//     `,
+//   },
+// });

@@ -2,7 +2,7 @@ module.exports = {
   settings: {
     'import/resolver': {
       node: {
-        extensions: ['.js', '.android.js', '.ios.js', '.jsx', '.android.jsx', '.ios.jsx']
+        extensions: ['.js', '.android.js', '.ios.js']
       }
     }
   },
@@ -133,6 +133,6 @@ module.exports = {
     ],
     'no-unused-vars': 1,
     'no-use-before-define': 0,
-    'no-console': 1
+    'no-console': ['warn', { allow: ['warn', 'error'] }]
   }
 };
